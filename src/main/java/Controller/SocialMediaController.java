@@ -39,77 +39,15 @@ public class SocialMediaController {
 
         // #5 retrieve message by id
         app.get("/messages/{message_id}", this::getMessageByIDHandler);
-        /* 
-        app.get("/messages/{message_id}", ctx -> {
-            String message_ID = ctx.pathParam("message_id");
-            try {
-                int id = Integer.parseInt(message_ID);
-                Message m = service.getMessage(id);
-                if(m != null){
-                    ObjectMapper mapper = new ObjectMapper();
-                    ctx.json(mapper.writeValueAsString(m));
-                }
-                
-            } catch (Exception e) {
-                System.out.println(e.getLocalizedMessage());
-            }
-            ctx.status(200);
-        });
-        */
 
         // #6 delete message by id
-        app.delete("/messages/{message_id}", ctx -> {
-            String message_ID = ctx.pathParam("message_id");
-            try {
-                int id = Integer.parseInt(message_ID);
-                Message m = service.deleteMessage(id);
-                if(m != null){
-                    ObjectMapper mapper = new ObjectMapper();
-                    ctx.json(mapper.writeValueAsString(m));
-                }
-                
-            } catch (Exception e) {
-                System.out.println(e.getLocalizedMessage());
-            }
-            ctx.status(200);
-        });
+        app.delete("/messages/{message_id}", this::deleteMessageHandler);
 
         // #7 update message
-        app.patch("/messages/{message_id}", ctx -> {
-            String message_ID = ctx.pathParam("message_id");
-            try {
-                int id = Integer.parseInt(message_ID);
-
-                ObjectMapper mapper = new ObjectMapper();
-                Message m = mapper.readValue(ctx.body(), Message.class);
-
-                Message ret = service.updateMessage(id, m.getMessage_text());
-                if(ret == null){
-                    ctx.status(400);
-                }else{
-                    ctx.status(200);
-                    ctx.json(mapper.writeValueAsString(ret));
-                }
-            } catch (Exception e) {
-                System.out.println(e.getLocalizedMessage());
-            }
-            
-        });
+        app.patch("/messages/{message_id}", this::updateMessageHandler);
 
         // #8 retrieve messages by user
-        app.get("/accounts/{account_id}/messages", ctx -> {
-            String account_ID = ctx.pathParam("account_id");
-            try {
-                int id = Integer.parseInt(account_ID);
-
-                ObjectMapper mapper = new ObjectMapper();
-                
-                ctx.json(mapper.writeValueAsString(service.getMessages(id)));
-            } catch (Exception e) {
-                System.out.println(e.getLocalizedMessage());
-            }
-            ctx.status(200);
-        });
+        app.get("/accounts/{account_id}/messages", this::retrieveMessageByUserHandler);
 
         return app;
     }
@@ -171,18 +109,65 @@ public class SocialMediaController {
     }
 
     private void getMessageByIDHandler(Context ctx){
-            String message_ID = ctx.pathParam("message_id");
-            try {
-                int id = Integer.parseInt(message_ID);
-                Message m = service.getMessage(id);
-                if(m != null){
-                    ObjectMapper mapper = new ObjectMapper();
-                    ctx.json(mapper.writeValueAsString(m));
-                }
-                
-            } catch (Exception e) {
-                System.out.println(e.getLocalizedMessage());
+        String message_ID = ctx.pathParam("message_id");
+        try {
+            int id = Integer.parseInt(message_ID);
+            Message m = service.getMessage(id);
+            if(m != null){
+                ObjectMapper mapper = new ObjectMapper();
+                ctx.json(mapper.writeValueAsString(m));
             }
-            ctx.status(200);
+        } catch (Exception e) {
+            System.out.println(e.getLocalizedMessage());
         }
+        ctx.status(200);
+    }
+
+    private void deleteMessageHandler(Context ctx){
+        String message_ID = ctx.pathParam("message_id");
+        try {
+            int id = Integer.parseInt(message_ID);
+            Message m = service.deleteMessage(id);
+            if(m != null){
+                ObjectMapper mapper = new ObjectMapper();
+                ctx.json(mapper.writeValueAsString(m));
+            }    
+        } catch (Exception e) {
+            System.out.println(e.getLocalizedMessage());
+        }
+        ctx.status(200);        
+    }
+
+    private void updateMessageHandler(Context ctx){
+        String message_ID = ctx.pathParam("message_id");
+        try {
+            int id = Integer.parseInt(message_ID);
+
+            ObjectMapper mapper = new ObjectMapper();
+            Message m = mapper.readValue(ctx.body(), Message.class);
+
+            Message ret = service.updateMessage(id, m.getMessage_text());
+            if(ret == null){
+                ctx.status(400);
+            }else{
+                ctx.status(200);
+                ctx.json(mapper.writeValueAsString(ret));
+            }
+        } catch (Exception e) {
+            System.out.println(e.getLocalizedMessage());
+        }            
+    }
+
+    private void retrieveMessageByUserHandler(Context ctx){
+        String account_ID = ctx.pathParam("account_id");
+        try {
+            int id = Integer.parseInt(account_ID);
+
+            ObjectMapper mapper = new ObjectMapper();
+            ctx.json(mapper.writeValueAsString(service.getMessages(id)));
+        } catch (Exception e) {
+            System.out.println(e.getLocalizedMessage());
+        }
+        ctx.status(200);
+    }
 }
